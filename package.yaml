@@ -21,6 +21,26 @@ description:         Please see the README on GitHub at <https://github.com/maxh
 
 dependencies:
 - base >= 4.7 && < 5
+# data types
+- text
+- bytestring
+- Cabal # for SDPX expressions
+- spdx # for SDPX.Extra
+- network-uri # URI
+- fgl # Martin Erwig's Functional Graph Library
+# containers
+- vector
+- hashable
+- containers
+- unordered-containers
+# parsing
+- aeson
+- aeson-pretty
+- yaml
+# file handling
+- filepath
+- directory
+
 
 library:
   source-dirs: src
@@ -46,3 +66,7 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - spdx-document
+    - hspec
+    - QuickCheck
+    - file-embed
+    - temporary

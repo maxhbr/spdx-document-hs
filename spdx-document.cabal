@@ -25,13 +25,38 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      MyPrelude
+      SPDX.Document
+      SPDX.Document.Annotations
+      SPDX.Document.Common
+      SPDX.Document.DocumentCreationInformation
+      SPDX.Document.FileInformation
+      SPDX.Document.OtherLicensingInformationDetected
+      SPDX.Document.PackageInformation
+      SPDX.Document.RelationshipsbetweenSPDXElements
+      SPDX.Document.RelationshipTypes
+      SPDX.Document.SnippetInformation
   other-modules:
       Paths_spdx_document
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      Cabal
+    , aeson
+    , aeson-pretty
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , directory
+    , fgl
+    , filepath
+    , hashable
+    , network-uri
+    , spdx
+    , text
+    , unordered-containers
+    , vector
+    , yaml
   default-language: Haskell2010
 
 executable spdx-document-exe
@@ -42,8 +67,23 @@ executable spdx-document-exe
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      Cabal
+    , aeson
+    , aeson-pretty
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , directory
+    , fgl
+    , filepath
+    , hashable
+    , network-uri
+    , spdx
     , spdx-document
+    , text
+    , unordered-containers
+    , vector
+    , yaml
   default-language: Haskell2010
 
 test-suite spdx-document-test
@@ -55,6 +95,25 @@ test-suite spdx-document-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      Cabal
+    , QuickCheck
+    , aeson
+    , aeson-pretty
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , directory
+    , fgl
+    , file-embed
+    , filepath
+    , hashable
+    , hspec
+    , network-uri
+    , spdx
     , spdx-document
+    , temporary
+    , text
+    , unordered-containers
+    , vector
+    , yaml
   default-language: Haskell2010

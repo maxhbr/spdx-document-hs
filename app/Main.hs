@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import SPDX.Document
 
 main :: IO ()
-main = someFunc
+main = undefined
