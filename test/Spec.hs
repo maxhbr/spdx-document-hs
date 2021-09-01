@@ -27,10 +27,13 @@ import qualified Data.Graph.Inductive.Graph as G
 import SPDX.Document
 
 spdxFileBS :: B.ByteString
-spdxFileBS = B.fromStrict $(embedFile "test/data/SPDXJSONExample-v2.2.spdx.json")
+spdxFileBS = B.fromStrict $(embedFile "./spdx-spec/examples/SPDXJSONExample-v2.2.spdx.json")
 
 spdxYamlFileBS :: BS.ByteString
-spdxYamlFileBS = $(embedFile "test/data/document.spdx.yml")
+spdxYamlFileBS = $(embedFile "./spdx-spec/examples/SPDXYAMLExample-2.2.spdx.yaml")
+ 
+otherSpdxYamlFileBS :: BS.ByteString
+otherSpdxYamlFileBS = $(embedFile "test/data/document.spdx.yml")
 
 spdxSpec = do
   describe "SpdxCollector" $ do

@@ -1,0 +1,3 @@
+[submodule "spdx-spec"]
+	path = spdx-spec
+	url = https://github.com/spdx/spdx-spec
