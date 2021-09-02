@@ -44,7 +44,9 @@ instance A.FromJSON SPDXPackageVerificationCode where
   parseJSON = A.withObject "SPDXPackageVerificationCode" $ \v ->
     SPDXPackageVerificationCode
     <$> v A..: "packageVerificationCodeValue"
-    <*> v A..: "packageVerificationCodeExcludedFiles"
+    <*> fmap (\case
+                Nothing -> []
+                Just pvcefs -> pvcefs) (v A..:? "packageVerificationCodeExcludedFiles")
 
 data SPDXPackage
 --         "packages" : {
