@@ -24,6 +24,8 @@ import qualified Data.Maybe as Maybe
 import qualified Data.ByteString.Lazy as B
 import qualified Data.Graph.Inductive.Graph as G
 import qualified Data.Graph.Inductive.PatriciaTree as UG
+import qualified Distribution.SPDX as SPDX
+import qualified Distribution.Parsec as SPDX
 
 import SPDX.Document.Common as X
 import SPDX.Document.DocumentCreationInformation as X
