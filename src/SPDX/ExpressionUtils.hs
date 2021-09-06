@@ -4,7 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
-module SPDX.Document
+module SPDX.ExpressionUtils
   ( parseLicense, parseLicenses
   , renderSpdxLicense
   ) where
