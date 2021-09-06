@@ -34,7 +34,6 @@ import SPDX.Document.SnippetInformation as X
 import SPDX.Document.OtherLicensingInformationDetected as X
 import SPDX.Document.Annotations as X
 import SPDX.Document.RelationshipsbetweenSPDXElements as X
-import SPDX.ExpressionUtils as X
 
 data SPDXDocument
   = SPDXDocument

@@ -34,6 +34,11 @@ spdxMaybeToMaybe :: SPDXMaybe a -> Maybe a
 spdxMaybeToMaybe (SPDXJust a) = Just a
 spdxMaybeToMaybe _            = Nothing
 
+parseLicense :: String -> SPDX.LicenseExpression
+parseLicense str = (`SPDX.ELicense` Nothing) $ case SPDX.eitherParsec str of
+  Right lic -> SPDX.ELicenseId lic
+  _         -> SPDX.ELicenseRef $ SPDX.mkLicenseRef' Nothing str
+
 parseLicenseExpression :: String -> SPDXMaybe SPDX.LicenseExpression
 parseLicenseExpression "NOASSERTION" = NOASSERTION
 parseLicenseExpression "NONE"        = NONE
@@ -41,6 +46,14 @@ parseLicenseExpression str           = case SPDX.eitherParsec str :: Either Stri
   Left err               -> NOASSERTION
   Right SPDX.NONE        -> NONE
   Right (SPDX.License l) -> SPDXJust l
+
+parseLicenses :: [String] -> Maybe SPDX.LicenseExpression
+parseLicenses [] = Nothing
+parseLicenses ls = let
+  parseLicenses' :: [String] -> SPDX.LicenseExpression
+  parseLicenses' [l] = parseLicense l
+  parseLicenses' (l:ls) = parseLicense l `SPDX.EAnd` (parseLicenses' ls)
+  in Just (parseLicenses' ls)
 
 renderSpdxLicense :: SPDX.LicenseExpression -> String
 renderSpdxLicense (SPDX.ELicense l _) = let
