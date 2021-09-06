@@ -9,7 +9,6 @@ module SPDX.Document
   , SPDXDocument (..)
   , parseSPDXDocument, parseSPDXDocumentBS
   , spdxDocumentToGraph
-  , parseLicense, parseLicenses
   ) where
 
 import MyPrelude
@@ -35,6 +34,7 @@ import SPDX.Document.SnippetInformation as X
 import SPDX.Document.OtherLicensingInformationDetected as X
 import SPDX.Document.Annotations as X
 import SPDX.Document.RelationshipsbetweenSPDXElements as X
+import SPDX.ExpressionUtils as X
 
 data SPDXDocument
   = SPDXDocument
@@ -121,17 +121,3 @@ spdxDocumentToGraph = let
     nodesMap = Map.fromList nodes
     edges = map (spdxRelationToEdge idsToIdxs) relationships
   in (G.mkGraph nodes edges, idsToIdxs, (Map.fromList . map (\(k,v) -> (v,k)) . Map.toList) idsToIdxs)
-
-parseLicense :: String -> SPDX.LicenseExpression
-parseLicense str = (`SPDX.ELicense` Nothing) $ case SPDX.eitherParsec str of
-  Right lic -> SPDX.ELicenseId lic
-  _         -> SPDX.ELicenseRef $ SPDX.mkLicenseRef' Nothing str
-
-parseLicenses :: [String] -> Maybe SPDX.LicenseExpression
-parseLicenses [] = Nothing
-parseLicenses ls = let
-
-  parseLicenses' :: [String] -> SPDX.LicenseExpression
-  parseLicenses' [l] = parseLicense l
-  parseLicenses' (l:ls) = parseLicense l `SPDX.EAnd` (parseLicenses' ls)
-  in Just (parseLicenses' ls)
