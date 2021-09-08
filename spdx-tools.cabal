@@ -4,11 +4,11 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 
-name:           spdx-document
+name:           spdx-tools
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/maxhbr/spdx-document#readme>
-homepage:       https://github.com/maxhbr/spdx-document#readme
-bug-reports:    https://github.com/maxhbr/spdx-document/issues
+description:    Please see the README on GitHub at <https://github.com/maxhbr/spdx-tools-hs#readme>
+homepage:       https://github.com/maxhbr/spdx-tools-hs#readme
+bug-reports:    https://github.com/maxhbr/spdx-tools-hs/issues
 author:         Maximillian Huber
 maintainer:     gh@maxhbr.de
 copyright:      Maximilian Huber
@@ -21,7 +21,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/maxhbr/spdx-document
+  location: https://github.com/maxhbr/spdx-tools-hs
 
 library
   exposed-modules:
@@ -37,7 +37,7 @@ library
       SPDX.Document.RelationshipTypes
       SPDX.Document.SnippetInformation
   other-modules:
-      Paths_spdx_document
+      Paths_spdx_tools
   hs-source-dirs:
       src
   build-depends:
@@ -59,10 +59,10 @@ library
     , yaml
   default-language: Haskell2010
 
-executable spdx-document-exe
+executable spdx-tools-exe
   main-is: Main.hs
   other-modules:
-      Paths_spdx_document
+      Paths_spdx_tools
   hs-source-dirs:
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
@@ -79,18 +79,18 @@ executable spdx-document-exe
     , hashable
     , network-uri
     , spdx
-    , spdx-document
+    , spdx-tools
     , text
     , unordered-containers
     , vector
     , yaml
   default-language: Haskell2010
 
-test-suite spdx-document-test
+test-suite spdx-tools-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_spdx_document
+      Paths_spdx_tools
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
@@ -110,7 +110,7 @@ test-suite spdx-document-test
     , hspec
     , network-uri
     , spdx
-    , spdx-document
+    , spdx-tools
     , temporary
     , text
     , unordered-containers
