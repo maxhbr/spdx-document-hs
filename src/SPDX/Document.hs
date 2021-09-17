@@ -34,6 +34,7 @@ import SPDX.Document.SnippetInformation as X
 import SPDX.Document.OtherLicensingInformationDetected as X
 import SPDX.Document.Annotations as X
 import SPDX.Document.RelationshipsbetweenSPDXElements as X
+import SPDX.Document.RelationshipTypes as RT
 
 data SPDXDocument
   = SPDXDocument
@@ -43,7 +44,6 @@ data SPDXDocument
   , _SPDX_creationInfo :: SPDXCreationInfo
   , _SPDX_name :: String
   , _SPDX_dataLicense :: String
-  , _SPDX_documentDescribes :: [SPDXID]
   -- , _SPDX_describesPackages :: [SPDXID]
 
   , _SPDX_files :: [SPDXFile]
@@ -51,24 +51,27 @@ data SPDXDocument
   , _SPDX_relationships :: [SPDXRelationship]
   } deriving (Eq, Show)
 instance A.FromJSON SPDXDocument where
-  parseJSON = A.withObject "SPDXDocument" $ \v ->
+  parseJSON = A.withObject "SPDXDocument" $ \v -> do
+    documentId <- v A..: "SPDXID"
+    relationsFromDocumentDescribes <- let
+      toRelationship describedId = SPDXRelationship Nothing RT.DESCRIBES describedId documentId
+      in fmap (map toRelationship . ([] `Maybe.fromMaybe`)) (v A..:? "documentDescribes")
     SPDXDocument
-    <$> v A..: "SPDXID"
-    <*> v A..:? "comment"
-    <*> v A..: "spdxVersion"
-    -- <*> v A..: "externalDocumentRefs"
-    <*> v A..: "creationInfo"
-    <*> v A..: "name"
-    <*> v A..: "dataLicense"
-    <*> v A..: "documentDescribes" -- or "describesPackages"
+      <$> (return documentId) 
+      <*> v A..:? "comment"
+      <*> v A..: "spdxVersion"
+      -- <*> v A..: "externalDocumentRefs"
+      <*> v A..: "creationInfo"
+      <*> v A..: "name"
+      <*> v A..: "dataLicense"
 
-    <*> fmap ([] `Maybe.fromMaybe`) (v A..:? "files")
-    <*> fmap ([] `Maybe.fromMaybe`) (v A..: "packages")
-    -- <*> v A..: "hasExtractedLicensingInfos"
-    -- <*> v A..: "snippets"
-    <*> fmap ([] `Maybe.fromMaybe`) (v A..:? "relationships")
-    -- <*> v A..: "revieweds"
-    -- <*> v A..: "annotations"
+      <*> fmap ([] `Maybe.fromMaybe`) (v A..:? "files")
+      <*> fmap ([] `Maybe.fromMaybe`) (v A..: "packages")
+      -- <*> v A..: "hasExtractedLicensingInfos"
+      -- <*> v A..: "snippets"
+      <*> fmap ((relationsFromDocumentDescribes ++) . ([] `Maybe.fromMaybe`)) (v A..:? "relationships")
+      -- <*> v A..: "revieweds"
+      -- <*> v A..: "annotations"
 
 parseSPDXDocument :: FilePath -> IO SPDXDocument
 parseSPDXDocument p = do
@@ -104,14 +107,18 @@ spdxDocumentToGraph = let
       , _SPDXRelationship_spdxElementId = target
       }) = (Map.findWithDefault (-1) source idsToIdxs, Map.findWithDefault (-1) target idsToIdxs, r)
   in \(SPDXDocument
-  { _SPDX_comment = _
+  { _SPDX_SPDXID = documentId
+  , _SPDX_comment = _
   , _SPDX_creationInfo = _
   , _SPDX_name = name
-  , _SPDX_documentDescribes = roots
   , _SPDX_files = files
   , _SPDX_packages = packages
   , _SPDX_relationships = relationships
   }) -> let
+    roots = (map _SPDXRelationship_relatedSpdxElement . filter (\case
+        SPDXRelationship _ RT.DESCRIBES _ spdxElementId -> spdxElementId == documentId
+        _                                            -> False
+      )) relationships
     idsToIdxs = Map.fromList (zip (List.nub $ roots ++ map _SPDXPackage_SPDXID packages ++ map _SPDXFile_SPDXID files) [1..])
     nodes = let
         nodesFromFiles = map (spdxFileToNode idsToIdxs) files
