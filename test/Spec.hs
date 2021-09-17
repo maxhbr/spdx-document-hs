@@ -24,6 +24,7 @@ import System.IO.Temp (withSystemTempDirectory)
 import System.Directory (doesFileExist)
 import qualified Data.Graph.Inductive.Graph as G
 
+import SPDX.Document.Common
 import SPDX.Document
 
 spdxFileBS :: B.ByteString
@@ -36,6 +37,16 @@ otherSpdxYamlFileBS :: BS.ByteString
 otherSpdxYamlFileBS = $(embedFile "test/data/document.spdx.yml")
 
 spdxSpec = do
+  describe "SPDX License expression parsing" $ do
+    it "parsing should work, license" $ do
+      parseLicenseExpression "MIT" `shouldNotBe` NONE
+      parseLicenseExpression "MIT" `shouldNotBe` NOASSERTION
+    it "parsing should work, valid expression" $ do
+      parseLicenseExpression "MIT AND Apache-2.0" `shouldNotBe` NONE
+      parseLicenseExpression "MIT AND Apache-2.0" `shouldNotBe` NOASSERTION
+    it "parsing should work, valid expression invalid names" $ do
+      parseLicenseExpression "unknown-license-reference AND unknown" `shouldNotBe` NONE 
+      parseLicenseExpression "unknown-license-reference AND unknown" `shouldNotBe` NOASSERTION
   describe "SpdxCollector" $ do
     it "parsing Json is successfull" $ let
         spdxResult = A.eitherDecode spdxFileBS :: Either String SPDXDocument

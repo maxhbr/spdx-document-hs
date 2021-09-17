@@ -43,7 +43,7 @@ parseLicenseExpression :: String -> SPDXMaybe SPDX.LicenseExpression
 parseLicenseExpression "NOASSERTION" = NOASSERTION
 parseLicenseExpression "NONE"        = NONE
 parseLicenseExpression str           = case SPDX.eitherParsec str :: Either String SPDX.License of
-  Left err               -> NOASSERTION
+  Left err               -> SPDXJust (parseLicense str)
   Right SPDX.NONE        -> NONE
   Right (SPDX.License l) -> SPDXJust l
 
