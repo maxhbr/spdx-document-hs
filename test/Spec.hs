@@ -20,6 +20,7 @@ import qualified Data.Yaml as Y
 import qualified Data.Yaml.Aeson as Y
 import qualified Data.Vector as V
 import qualified Data.Map as Map
+import qualified Data.Maybe as Maybe
 import System.IO.Temp (withSystemTempDirectory)
 import System.Directory (doesFileExist)
 import qualified Data.Graph.Inductive.Graph as G
@@ -41,9 +42,12 @@ spdxSpec = do
     it "parsing should work, license" $ do
       parseLicenseExpression "MIT" `shouldNotBe` NONE
       parseLicenseExpression "MIT" `shouldNotBe` NOASSERTION
+      renderSpdxLicense (Maybe.fromJust (parseLicenses ["MIT"])) `shouldBe` "MIT"
     it "parsing should work, valid expression" $ do
       parseLicenseExpression "MIT AND Apache-2.0" `shouldNotBe` NONE
       parseLicenseExpression "MIT AND Apache-2.0" `shouldNotBe` NOASSERTION
+      renderSpdxLicense (Maybe.fromJust (parseLicenses ["MIT AND Apache-2.0"])) `shouldBe` "( MIT AND Apache-2.0 )"
+      renderSpdxLicense (Maybe.fromJust (parseLicenses ["MIT", "Apache-2.0"])) `shouldBe` "( MIT AND Apache-2.0 )"
     it "parsing should work, valid expression invalid names" $ do
       parseLicenseExpression "unknown-license-reference AND unknown" `shouldNotBe` NONE 
       parseLicenseExpression "unknown-license-reference AND unknown" `shouldNotBe` NOASSERTION

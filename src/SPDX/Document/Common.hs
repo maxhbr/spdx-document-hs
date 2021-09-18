@@ -68,7 +68,7 @@ parseLicenses ls =
 renderSpdxLicense :: SPDX.LicenseExpression -> String
 renderSpdxLicense (SPDX.ELicense l _) =
   let renderSpdxLicense' :: SPDX.SimpleLicenseExpression -> String
-      renderSpdxLicense' (SPDX.ELicenseId  l') = show l'
+      renderSpdxLicense' (SPDX.ELicenseId  l') = SPDX.licenseId l'
       renderSpdxLicense' (SPDX.ELicenseRef l') = SPDX.licenseRef l'
   in  renderSpdxLicense' l
 renderSpdxLicense (SPDX.EAnd l r) =
