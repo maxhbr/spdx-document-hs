@@ -39,18 +39,25 @@ otherSpdxYamlFileBS = $(embedFile "test/data/document.spdx.yml")
 
 spdxSpec = do
   describe "SPDX License expression parsing" $ do
+
     it "parsing should work, license" $ do
       parseLicenseExpression "MIT" `shouldNotBe` NONE
       parseLicenseExpression "MIT" `shouldNotBe` NOASSERTION
+
       renderSpdxLicense (Maybe.fromJust (parseLicenses ["MIT"])) `shouldBe` "MIT"
+
     it "parsing should work, valid expression" $ do
       parseLicenseExpression "MIT AND Apache-2.0" `shouldNotBe` NONE
       parseLicenseExpression "MIT AND Apache-2.0" `shouldNotBe` NOASSERTION
+
       renderSpdxLicense (Maybe.fromJust (parseLicenses ["MIT AND Apache-2.0"])) `shouldBe` "( MIT AND Apache-2.0 )"
+
       renderSpdxLicense (Maybe.fromJust (parseLicenses ["MIT", "Apache-2.0"])) `shouldBe` "( MIT AND Apache-2.0 )"
+
     it "parsing should work, valid expression invalid names" $ do
       parseLicenseExpression "unknown-license-reference AND unknown" `shouldNotBe` NONE 
       parseLicenseExpression "unknown-license-reference AND unknown" `shouldNotBe` NOASSERTION
+
   describe "SpdxCollector" $ do
     it "parsing Json is successfull" $ let
         spdxResult = A.eitherDecode spdxFileBS :: Either String SPDXDocument
