@@ -6,13 +6,14 @@
 {-# LANGUAGE LambdaCase #-}
 module SPDX.Document.Common where
 
-import MyPrelude
+import           MyPrelude
 
-import qualified Data.Aeson as A
-import qualified Data.Aeson.Types as A
-import qualified Data.Text as T
-import qualified Distribution.SPDX as SPDX
-import qualified Distribution.Parsec as SPDX
+import qualified Data.Aeson                    as A
+import qualified Data.Aeson.Types              as A
+import qualified Data.List                     as List
+import qualified Data.Text                     as T
+import qualified Distribution.Parsec           as SPDX
+import qualified Distribution.SPDX             as SPDX
 
 type SPDXID = String
 
@@ -23,8 +24,8 @@ data SPDXMaybe a
   deriving (Eq)
 instance (Show a) => Show (SPDXMaybe a) where
   show (SPDXJust a) = show a
-  show NOASSERTION = "NOASSERTION"
-  show NONE        = "NONE"
+  show NOASSERTION  = "NOASSERTION"
+  show NONE         = "NONE"
 instance (A.FromJSON a) => A.FromJSON (SPDXMaybe a) where
   parseJSON = A.withText "SPDXMaybe" $ \case
     "NOASSERTION" -> pure NOASSERTION
@@ -42,27 +43,32 @@ parseLicense str = (`SPDX.ELicense` Nothing) $ case SPDX.eitherParsec str of
 parseLicenseExpression :: String -> SPDXMaybe SPDX.LicenseExpression
 parseLicenseExpression "NOASSERTION" = NOASSERTION
 parseLicenseExpression "NONE"        = NONE
-parseLicenseExpression str           = case SPDX.eitherParsec str :: Either String SPDX.License of
-  Left err               -> SPDXJust (parseLicense str)
-  Right SPDX.NONE        -> NONE
-  Right (SPDX.License l) -> SPDXJust l
+parseLicenseExpression str =
+  case SPDX.eitherParsec str :: Either String SPDX.License of
+    Left  err              -> SPDXJust (parseLicense str)
+    Right SPDX.NONE        -> NONE
+    Right (SPDX.License l) -> SPDXJust l
 
 parseLicenses :: [String] -> Maybe SPDX.LicenseExpression
 parseLicenses [] = Nothing
-parseLicenses ls = let
-  parseLicenses' :: [String] -> SPDX.LicenseExpression
-  parseLicenses' [l] = parseLicense l
-  parseLicenses' (l:ls) = parseLicense l `SPDX.EAnd` (parseLicenses' ls)
-  in Just (parseLicenses' ls)
+parseLicenses ls =
+  let
+    parseLicenses' :: [String] -> SPDX.LicenseExpression
+    parseLicenses' [l     ] = parseLicense l
+    parseLicenses' (l : ls) = parseLicense l `SPDX.EAnd` (parseLicenses' ls)
+  in
+    Just (parseLicenses' (List.nub ls))
 
 renderSpdxLicense :: SPDX.LicenseExpression -> String
-renderSpdxLicense (SPDX.ELicense l _) = let
-  renderSpdxLicense' :: SPDX.SimpleLicenseExpression -> String
-  renderSpdxLicense' (SPDX.ELicenseId l') = show l'
-  renderSpdxLicense' (SPDX.ELicenseRef l') = SPDX.licenseRef l'
-  in renderSpdxLicense' l
-renderSpdxLicense (SPDX.EAnd l r) = unwords ["(", renderSpdxLicense l, "AND", renderSpdxLicense r, ")"]
-renderSpdxLicense (SPDX.EOr l r) = unwords ["(", renderSpdxLicense l, "OR", renderSpdxLicense r, ")"]
+renderSpdxLicense (SPDX.ELicense l _) =
+  let renderSpdxLicense' :: SPDX.SimpleLicenseExpression -> String
+      renderSpdxLicense' (SPDX.ELicenseId  l') = show l'
+      renderSpdxLicense' (SPDX.ELicenseRef l') = SPDX.licenseRef l'
+  in  renderSpdxLicense' l
+renderSpdxLicense (SPDX.EAnd l r) =
+  unwords ["(", renderSpdxLicense l, "AND", renderSpdxLicense r, ")"]
+renderSpdxLicense (SPDX.EOr l r) =
+  unwords ["(", renderSpdxLicense l, "OR", renderSpdxLicense r, ")"]
 
 renderLicenseExpression :: SPDXMaybe SPDX.LicenseExpression -> Maybe String
 renderLicenseExpression (SPDXJust l) = Just $ renderSpdxLicense l
@@ -101,12 +107,11 @@ data SPDXChecksum
 --                 },
 --                 "minItems" : 1
 --               },
-  = SPDXChecksum
-  { _SPDXChecksum_algorithm :: SPDXChecksumAlgorithm
+                  = SPDXChecksum
+  { _SPDXChecksum_algorithm     :: SPDXChecksumAlgorithm
   , _SPDXChecksum_checksumValue :: String
-  } deriving (Eq,Show)
+  }
+  deriving (Eq, Show)
 instance A.FromJSON SPDXChecksum where
-  parseJSON = A.withObject "SPDXChecksum" $ \v ->
-    SPDXChecksum
-    <$> v A..: "algorithm"
-    <*> v A..: "checksumValue"
+  parseJSON = A.withObject "SPDXChecksum"
+    $ \v -> SPDXChecksum <$> v A..: "algorithm" <*> v A..: "checksumValue"
