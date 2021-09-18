@@ -35,29 +35,35 @@ spdxMaybeToMaybe :: SPDXMaybe a -> Maybe a
 spdxMaybeToMaybe (SPDXJust a) = Just a
 spdxMaybeToMaybe _            = Nothing
 
-parseLicense :: String -> SPDX.LicenseExpression
-parseLicense str = (`SPDX.ELicense` Nothing) $ case SPDX.eitherParsec str of
-  Right lic -> SPDX.ELicenseId lic
-  _         -> SPDX.ELicenseRef $ SPDX.mkLicenseRef' Nothing str
+parseLicense :: String -> Maybe SPDX.LicenseExpression
+parseLicense str = 
+  case SPDX.eitherParsec str :: Either String SPDX.License of
+    Left  err              -> Just . (`SPDX.ELicense` Nothing) $ case SPDX.eitherParsec str of
+                              Right lic -> SPDX.ELicenseId lic
+                              _         -> SPDX.ELicenseRef $ SPDX.mkLicenseRef' Nothing str
+    Right SPDX.NONE        -> Nothing
+    Right (SPDX.License l) -> Just l
 
 parseLicenseExpression :: String -> SPDXMaybe SPDX.LicenseExpression
 parseLicenseExpression "NOASSERTION" = NOASSERTION
 parseLicenseExpression "NONE"        = NONE
-parseLicenseExpression str =
-  case SPDX.eitherParsec str :: Either String SPDX.License of
-    Left  err              -> SPDXJust (parseLicense str)
-    Right SPDX.NONE        -> NONE
-    Right (SPDX.License l) -> SPDXJust l
+parseLicenseExpression str = case parseLicense str of
+  Just l -> SPDXJust l
+  Nothing -> NONE
 
 parseLicenses :: [String] -> Maybe SPDX.LicenseExpression
 parseLicenses [] = Nothing
 parseLicenses ls =
   let
-    parseLicenses' :: [String] -> SPDX.LicenseExpression
+    parseLicenses' :: [String] -> Maybe SPDX.LicenseExpression
     parseLicenses' [l     ] = parseLicense l
-    parseLicenses' (l : ls) = parseLicense l `SPDX.EAnd` (parseLicenses' ls)
+    parseLicenses' (l : ls) = case (parseLicenses' ls) of
+      Just pls -> case parseLicense l of
+        Just pl -> Just $ pl `SPDX.EAnd` pls
+        Nothing -> Just pls
+      Nothing -> parseLicense l
   in
-    Just (parseLicenses' (List.nub ls))
+    (parseLicenses' (List.nub ls))
 
 renderSpdxLicense :: SPDX.LicenseExpression -> String
 renderSpdxLicense (SPDX.ELicense l _) =
