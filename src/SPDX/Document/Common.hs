@@ -69,7 +69,7 @@ renderSpdxLicense (SPDX.ELicense l _) =
       renderSpdxLicense' (SPDX.ELicenseRef l') = SPDX.licenseRef l'
   in  renderSpdxLicense' l
 renderSpdxLicense (SPDX.EAnd l r) =
-  unwords ["(", renderSpdxLicense l, "AND", renderSpdxLicense r, ")"]
+  unwords [renderSpdxLicense l, "AND", renderSpdxLicense r]
 renderSpdxLicense (SPDX.EOr l r) =
   unwords ["(", renderSpdxLicense l, "OR", renderSpdxLicense r, ")"]
 
