@@ -82,7 +82,6 @@ instance A.FromJSON SPDXDocument where
       A..:  "name"
       <*>   v
       A..:  "dataLicense"
-
       <*>   fmap ([] `Maybe.fromMaybe`) (v A..:? "files")
       <*>   fmap ([] `Maybe.fromMaybe`) (v A..: "packages")
       -- <*> v A..: "hasExtractedLicensingInfos"

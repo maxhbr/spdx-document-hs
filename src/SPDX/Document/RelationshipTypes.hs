@@ -5,13 +5,12 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
-module SPDX.Document.RelationshipTypes
-  where
+module SPDX.Document.RelationshipTypes where
 
-import MyPrelude
+import           MyPrelude
 
-import qualified Data.Aeson as A
-import qualified Data.Aeson.Types as A
+import qualified Data.Aeson                    as A
+import qualified Data.Aeson.Types              as A
 
 
 --------------------------------------------------------------------------------

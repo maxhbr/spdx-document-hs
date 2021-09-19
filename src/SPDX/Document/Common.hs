@@ -36,34 +36,31 @@ spdxMaybeToMaybe (SPDXJust a) = Just a
 spdxMaybeToMaybe _            = Nothing
 
 parseLicense :: String -> Maybe SPDX.LicenseExpression
-parseLicense str = 
-  case SPDX.eitherParsec str :: Either String SPDX.License of
-    Left  err              -> Just . (`SPDX.ELicense` Nothing) $ case SPDX.eitherParsec str of
-                              Right lic -> SPDX.ELicenseId lic
-                              _         -> SPDX.ELicenseRef $ SPDX.mkLicenseRef' Nothing str
-    Right SPDX.NONE        -> Nothing
-    Right (SPDX.License l) -> Just l
+parseLicense str = case SPDX.eitherParsec str :: Either String SPDX.License of
+  Left err -> Just . (`SPDX.ELicense` Nothing) $ case SPDX.eitherParsec str of
+    Right lic -> SPDX.ELicenseId lic
+    _         -> SPDX.ELicenseRef $ SPDX.mkLicenseRef' Nothing str
+  Right SPDX.NONE        -> Nothing
+  Right (SPDX.License l) -> Just l
 
 parseLicenseExpression :: String -> SPDXMaybe SPDX.LicenseExpression
 parseLicenseExpression "NOASSERTION" = NOASSERTION
 parseLicenseExpression "NONE"        = NONE
-parseLicenseExpression str = case parseLicense str of
-  Just l -> SPDXJust l
+parseLicenseExpression str           = case parseLicense str of
+  Just l  -> SPDXJust l
   Nothing -> NONE
 
 parseLicenses :: [String] -> Maybe SPDX.LicenseExpression
 parseLicenses [] = Nothing
 parseLicenses ls =
-  let
-    parseLicenses' :: [String] -> Maybe SPDX.LicenseExpression
-    parseLicenses' [l     ] = parseLicense l
-    parseLicenses' (l : ls) = case (parseLicenses' ls) of
-      Just pls -> case parseLicense l of
-        Just pl -> Just $ pl `SPDX.EAnd` pls
-        Nothing -> Just pls
-      Nothing -> parseLicense l
-  in
-    (parseLicenses' (List.nub ls))
+  let parseLicenses' :: [String] -> Maybe SPDX.LicenseExpression
+      parseLicenses' [l     ] = parseLicense l
+      parseLicenses' (l : ls) = case (parseLicenses' ls) of
+        Just pls -> case parseLicense l of
+          Just pl -> Just $ pl `SPDX.EAnd` pls
+          Nothing -> Just pls
+        Nothing -> parseLicense l
+  in  (parseLicenses' (List.nub ls))
 
 renderSpdxLicense :: SPDX.LicenseExpression -> String
 renderSpdxLicense (SPDX.ELicense l _) =

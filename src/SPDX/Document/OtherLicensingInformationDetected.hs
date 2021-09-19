@@ -4,10 +4,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
-module SPDX.Document.OtherLicensingInformationDetected
-  where
+module SPDX.Document.OtherLicensingInformationDetected where
 
-import MyPrelude
+import           MyPrelude
 
-import qualified Data.Aeson as A
-import qualified Data.Aeson.Types as A
+import qualified Data.Aeson                    as A
+import qualified Data.Aeson.Types              as A

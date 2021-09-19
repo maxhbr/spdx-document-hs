@@ -4,16 +4,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
-module SPDX.Document.RelationshipsbetweenSPDXElements
-  where
+module SPDX.Document.RelationshipsbetweenSPDXElements where
 
-import MyPrelude
+import           MyPrelude
 
-import SPDX.Document.Common
-import SPDX.Document.RelationshipTypes
+import           SPDX.Document.Common
+import           SPDX.Document.RelationshipTypes
 
-import qualified Data.Aeson as A
-import qualified Data.Aeson.Types as A
+import qualified Data.Aeson                    as A
+import qualified Data.Aeson.Types              as A
 
 data SPDXRelationship
 --         "relationships" : {
@@ -37,16 +36,21 @@ data SPDXRelationship
 --             }
 --           }
 --         }
-  = SPDXRelationship
-  { _SPDXRelationship_comment :: Maybe String
-  , _SPDXRelationship_relationshipType :: RelationType
+                      = SPDXRelationship
+  { _SPDXRelationship_comment            :: Maybe String
+  , _SPDXRelationship_relationshipType   :: RelationType
   , _SPDXRelationship_relatedSpdxElement :: SPDXID
-  , _SPDXRelationship_spdxElementId :: SPDXID
-  } deriving (Eq, Show)
+  , _SPDXRelationship_spdxElementId      :: SPDXID
+  }
+  deriving (Eq, Show)
 instance A.FromJSON SPDXRelationship where
   parseJSON = A.withObject "SPDXRelationship" $ \v ->
     SPDXRelationship
-    <$> v A..:? "comment"
-    <*> v A..: "relationshipType"
-    <*> v A..: "relatedSpdxElement"
-    <*> v A..: "spdxElementId"
+      <$>   v
+      A..:? "comment"
+      <*>   v
+      A..:  "relationshipType"
+      <*>   v
+      A..:  "relatedSpdxElement"
+      <*>   v
+      A..:  "spdxElementId"
