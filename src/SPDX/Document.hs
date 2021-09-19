@@ -52,10 +52,13 @@ data SPDXDocument = SPDXDocument
   , _SPDX_creationInfo  :: SPDXCreationInfo
   , _SPDX_name          :: String
   , _SPDX_dataLicense   :: String
-                  -- , _SPDX_describesPackages :: [SPDXID]
+  -- , _SPDX_describesPackages :: [SPDXID]
   , _SPDX_files         :: [SPDXFile]
   , _SPDX_packages      :: [SPDXPackage]
   , _SPDX_relationships :: [SPDXRelationship]
+  -- , _SPDX_externalDocumentRefs :: [_]
+  -- , _SPDX_sinppets :: [_]
+  -- , _SPDX_hasExtractedLicensingInfos :: [_]
   }
   deriving (Eq, Show)
 instance A.FromJSON SPDXDocument where
