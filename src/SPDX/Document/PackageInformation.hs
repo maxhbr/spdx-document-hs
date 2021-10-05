@@ -323,3 +323,5 @@ instance A.FromJSON SPDXPackage where
     -- <*> v A..: "annotations"
       <*>   v
       A..:? "hasFiles"
+instance SPDXIDable SPDXPackage where
+  getSPDXID = _SPDXPackage_SPDXID

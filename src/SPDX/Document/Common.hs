@@ -16,6 +16,10 @@ import qualified Distribution.Parsec           as SPDX
 import qualified Distribution.SPDX             as SPDX
 
 type SPDXID = String
+class SPDXIDable a where
+  getSPDXID :: a -> SPDXID
+  matchesSPDXID :: a -> SPDXID -> Bool
+  matchesSPDXID a = ((getSPDXID a) ==)
 
 data SPDXMaybe a
   = SPDXJust a

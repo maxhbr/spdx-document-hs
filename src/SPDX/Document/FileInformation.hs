@@ -225,3 +225,5 @@ instance A.FromJSON SPDXFile where
     -- <*> v A..: "artifactOfs"
       <*>   v
       A..:? "name"
+instance SPDXIDable SPDXFile where
+  getSPDXID = _SPDXFile_SPDXID

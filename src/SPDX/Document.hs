@@ -90,6 +90,8 @@ instance A.FromJSON SPDXDocument where
                  (v A..:? "relationships")
       -- <*> v A..: "revieweds"
       -- <*> v A..: "annotations"
+instance SPDXIDable SPDXDocument where
+  getSPDXID = _SPDX_SPDXID
 
 parseSPDXDocument :: FilePath -> IO SPDXDocument
 parseSPDXDocument p = do
@@ -159,6 +161,12 @@ spdxDocumentToGraph =
                 nodesFromPackages = map (spdxPackageToNode idsToIdxs) packages
             in  nodesFromFiles ++ nodesFromPackages
           nodesMap = Map.fromList nodes
+          relationshipsFromHasFiles = concatMap (\package -> let
+              pSPDXID = getSPDXID package
+            in case _SPDXPackage_hasFiles package of
+              Just fSPDXIDs -> map (\fSPDXID -> SPDXRelationship Nothing CONTAINS pSPDXID fSPDXID) fSPDXIDs
+              _             -> []
+              ) packages
           edges    = map (spdxRelationToEdge idsToIdxs) relationships
       in  ( G.mkGraph nodes edges
           , idsToIdxs
