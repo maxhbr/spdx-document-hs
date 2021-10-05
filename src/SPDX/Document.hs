@@ -167,7 +167,7 @@ spdxDocumentToGraph =
               Just fSPDXIDs -> map (\fSPDXID -> SPDXRelationship Nothing CONTAINS pSPDXID fSPDXID) fSPDXIDs
               _             -> []
               ) packages
-          edges    = map (spdxRelationToEdge idsToIdxs) relationships
+          edges    = map (spdxRelationToEdge idsToIdxs) (List.nub (relationships ++ relationshipsFromHasFiles))
       in  ( G.mkGraph nodes edges
           , idsToIdxs
           , (Map.fromList . map (\(k, v) -> (v, k)) . Map.toList) idsToIdxs
