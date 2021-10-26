@@ -71,6 +71,7 @@ spdxSpec = do
               Right _ -> Nothing
               Left err -> Just err
        in do potentialError `shouldBe` Nothing
+             putStrLn (ppSpdxGraph (fromRight undefined spdxResult))
              isRight spdxResult `shouldBe` True
     it "parsing YML is successfull" $
       let spdxYmlResult =

@@ -5,13 +5,29 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
+
 module SPDX.Document.RelationshipTypes where
 
-import           MyPrelude
+import MyPrelude
 
-import qualified Data.Aeson                    as A
-import qualified Data.Aeson.Types              as A
+import qualified Data.Aeson as A
+import qualified Data.Aeson.Types as A
+import qualified Data.Map as Map
+import qualified Data.Tuple as Tuple
 
+getInverseRelationType :: RelationType -> Maybe RelationType
+getInverseRelationType =
+  let inverses =
+        [ (DESCRIBES, DESCRIBED_BY)
+        , (CONTAINS, CONTAINED_BY)
+        , (DEPENDS_ON, DEPENDENCY_OF)
+        , (GENERATES, GENERATED_FROM)
+        , (ANCESTOR_OF, DESCENDANT_OF)
+        , (PREREQUISITE_FOR, HAS_PREREQUISITE)
+        ]
+      inversesMap :: Map.Map RelationType RelationType
+      inversesMap = Map.fromList (inverses ++ map Tuple.swap inverses)
+   in (`Map.lookup` inversesMap)
 
 --------------------------------------------------------------------------------
 {-|
@@ -147,6 +163,8 @@ data RelationType
     -- An APPLICATION foo.exe has prerequisite or dependency on bar.dll
   | OTHER
     -- Is to be used for a relationship which has not been defined in the formal SPDX specification. A description of the relationship should be included in the Relationship comments field.
-  deriving (Eq, Show, Generic)
+  deriving (Eq, Show, Generic, Enum, Ord)
+
 instance A.ToJSON RelationType
+
 instance A.FromJSON RelationType

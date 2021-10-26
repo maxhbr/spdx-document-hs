@@ -12,6 +12,7 @@ module SPDX.Document
   , parseSPDXDocumentBS
   , spdxDocumentToGraph
   , getRootsFromDocument
+  , ppSpdxGraph
   ) where
 
 import MyPrelude
@@ -141,6 +142,12 @@ spdxDocumentToGraph =
         ( Map.findWithDefault (-1) source idsToIdxs
         , Map.findWithDefault (-1) target idsToIdxs
         , r)
+      addInverseEdges :: G.LEdge SPDXRelationship -> [G.LEdge SPDXRelationship]
+      addInverseEdges e@(source, target, r@SPDXRelationship {_SPDXRelationship_relationshipType = rt}) =
+        case getInverseRelationType rt of
+          Just irt ->
+            [e, (target, source, r {_SPDXRelationship_relationshipType = irt})]
+          Nothing -> [e]
    in \(doc@SPDXDocument { _SPDX_name = name
                          , _SPDX_files = files
                          , _SPDX_packages = packages
@@ -177,9 +184,27 @@ spdxDocumentToGraph =
                          _ -> [])
                 packages
             edges =
-              map
-                (spdxRelationToEdge idsToIdxs)
+              List.nub $
+              concatMap
+                (addInverseEdges . spdxRelationToEdge idsToIdxs)
                 (List.nub (relationships ++ relationshipsFromHasFiles))
          in ( G.mkGraph nodes edges
             , idsToIdxs
             , (Map.fromList . map (\(k, v) -> (v, k)) . Map.toList) idsToIdxs)
+
+ppSpdxGraph :: SPDXDocument -> String
+ppSpdxGraph spdx =
+  let (graph, _, _) = spdxDocumentToGraph spdx
+      ppNode (Left (SPDXFile { _SPDXFile_SPDXID = spdxid
+                             , _SPDXFile_fileName = fileName
+                             })) = spdxid ++ ":" ++ fileName
+      ppNode (Right (SPDXPackage { _SPDXPackage_SPDXID = spdxid
+                                 , _SPDXPackage_packageFileName = Just pfn
+                                 })) = spdxid ++ ":" ++ pfn
+      ppNode (Right (SPDXPackage { _SPDXPackage_SPDXID = spdxid
+                                 , _SPDXPackage_name = name
+                                 })) =
+        case name of
+          "" -> spdxid
+          _ -> spdxid ++ ":" ++ name
+   in G.prettify $ G.nemap ppNode _SPDXRelationship_relationshipType graph
