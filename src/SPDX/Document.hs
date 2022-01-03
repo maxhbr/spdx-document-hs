@@ -1,12 +1,13 @@
+{-# LANGUAGE DeriveGeneric             #-}
 {-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE GADTs                     #-}
+{-# LANGUAGE LambdaCase                #-}
+{-# LANGUAGE OverloadedStrings         #-}
+{-# LANGUAGE TypeFamilies              #-}
 
 module SPDX.Document
   ( module X
+  , module SPDX
   , SPDXDocument(..)
   , parseSPDXDocument
   , parseSPDXDocumentBS
@@ -15,42 +16,43 @@ module SPDX.Document
   , ppSpdxGraph
   ) where
 
-import MyPrelude
+import           MyPrelude
 
-import qualified Data.Aeson as A
-import qualified Data.Aeson.Types as A
-import qualified Data.ByteString.Lazy as B
-import qualified Data.Graph.Inductive.Graph as G
-import qualified Data.Graph.Inductive.PatriciaTree as UG
-import qualified Data.List as List
-import qualified Data.Map as Map
-import qualified Data.Maybe as Maybe
-import qualified Data.Text as T
-import qualified Data.Yaml as Y
-import qualified Distribution.Parsec as SPDX
-import qualified Distribution.SPDX as SPDX
+import qualified Data.Aeson                                      as A
+import qualified Data.Aeson.Types                                as A
+import qualified Data.ByteString.Lazy                            as B
+import qualified Data.Graph.Inductive.Graph                      as G
+import qualified Data.Graph.Inductive.PatriciaTree               as UG
+import qualified Data.List                                       as List
+import qualified Data.Map                                        as Map
+import qualified Data.Maybe                                      as Maybe
+import qualified Data.Text                                       as T
+import qualified Data.Yaml                                       as Y
+import qualified Distribution.Parsec                             as SPDX
+import qualified Distribution.SPDX                               as SPDX hiding
+                                                                         (NONE)
 
-import SPDX.Document.Annotations as X
-import SPDX.Document.Common as X
-import SPDX.Document.DocumentCreationInformation as X
-import SPDX.Document.FileInformation as X
-import SPDX.Document.OtherLicensingInformationDetected as X
-import SPDX.Document.PackageInformation as X
-import SPDX.Document.RelationshipTypes as RT
-import SPDX.Document.RelationshipsbetweenSPDXElements as X
-import SPDX.Document.SnippetInformation as X
+import           SPDX.Document.Annotations                       as X
+import           SPDX.Document.Common                            as X
+import           SPDX.Document.DocumentCreationInformation       as X
+import           SPDX.Document.FileInformation                   as X
+import           SPDX.Document.OtherLicensingInformationDetected as X
+import           SPDX.Document.PackageInformation                as X
+import           SPDX.Document.RelationshipTypes                 as RT
+import           SPDX.Document.RelationshipsbetweenSPDXElements  as X
+import           SPDX.Document.SnippetInformation                as X
 
 data SPDXDocument =
   SPDXDocument
-    { _SPDX_SPDXID :: SPDXID
-    , _SPDX_comment :: Maybe String
-    , _SPDX_spdxVersion :: String
-    , _SPDX_creationInfo :: SPDXCreationInfo
-    , _SPDX_name :: String
-    , _SPDX_dataLicense :: String
+    { _SPDX_SPDXID        :: SPDXID
+    , _SPDX_comment       :: Maybe String
+    , _SPDX_spdxVersion   :: String
+    , _SPDX_creationInfo  :: SPDXCreationInfo
+    , _SPDX_name          :: String
+    , _SPDX_dataLicense   :: String
   -- , _SPDX_describesPackages :: [SPDXID]
-    , _SPDX_files :: [SPDXFile]
-    , _SPDX_packages :: [SPDXPackage]
+    , _SPDX_files         :: [SPDXFile]
+    , _SPDX_packages      :: [SPDXPackage]
     , _SPDX_relationships :: [SPDXRelationship]
   -- , _SPDX_externalDocumentRefs :: [_]
   -- , _SPDX_sinppets :: [_]
@@ -89,7 +91,7 @@ parseSPDXDocument :: FilePath -> IO SPDXDocument
 parseSPDXDocument p = do
   bs <- B.readFile p
   case parseSPDXDocumentBS bs of
-    Left err -> fail err
+    Left err   -> fail err
     Right spdx -> return spdx
 
 parseSPDXDocumentBS :: B.ByteString -> Either String SPDXDocument
@@ -99,7 +101,7 @@ parseSPDXDocumentBS bs =
     Left err ->
       case Y.decodeEither' (B.toStrict bs) of
         Right spdx -> Right spdx
-        Left err' -> Left (show [err, show err'])
+        Left err'  -> Left (show [err, show err'])
 
 getRootsFromDocument :: SPDXDocument -> [SPDXID]
 getRootsFromDocument (SPDXDocument { _SPDX_SPDXID = documentId
@@ -206,5 +208,5 @@ ppSpdxGraph spdx =
                                  })) =
         case name of
           "" -> spdxid
-          _ -> spdxid ++ ":" ++ name
+          _  -> spdxid ++ ":" ++ name
    in G.prettify $ G.nemap ppNode _SPDXRelationship_relationshipType graph
