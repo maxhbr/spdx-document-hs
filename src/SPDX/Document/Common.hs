@@ -45,6 +45,14 @@ spdxMaybeToMaybe :: SPDXMaybe a -> Maybe a
 spdxMaybeToMaybe (SPDXJust a) = Just a
 spdxMaybeToMaybe _            = Nothing
 
+instance Foldable SPDXMaybe where
+  foldMap f (SPDXJust x) = f x
+  foldMap f _            = mempty
+  foldr f z (SPDXJust x) = f x z
+  foldr _ z _            = z
+  foldl f z (SPDXJust x) = f z x
+  foldl _ z _            = z
+
 data SPDXChecksumAlgorithm
   = SHA256
   | SHA1
