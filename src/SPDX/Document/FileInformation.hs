@@ -1,20 +1,21 @@
+{-# LANGUAGE DeriveGeneric             #-}
 {-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE GADTs                     #-}
+{-# LANGUAGE LambdaCase                #-}
+{-# LANGUAGE OverloadedStrings         #-}
+{-# LANGUAGE TypeFamilies              #-}
+
 module SPDX.Document.FileInformation where
 
 import           MyPrelude
 
 import           SPDX.Document.Common
 
-import qualified Data.Aeson                    as A
-import qualified Data.Aeson.Types              as A
-import qualified Data.Vector                   as V
-import qualified Distribution.Parsec           as SPDX
-import qualified Distribution.SPDX             as SPDX
+import qualified Data.Aeson           as A
+import qualified Data.Aeson.Types     as A
+import qualified Data.Vector          as V
+import qualified Distribution.Parsec  as SPDX
+import qualified Distribution.SPDX    as SPDX
 
 data SPDXFileType
   = OTHER
@@ -29,8 +30,32 @@ data SPDXFileType
   | TEXT
   | AUDIO
   deriving (Eq, Show, Generic)
+
 instance A.FromJSON SPDXFileType
-data SPDXFile
+
+data SPDXFile =
+  SPDXFile
+    { _SPDXFile_SPDXID               :: SPDXID
+    , _SPDXFile_raw                  :: A.Object
+    , _SPDXFile_fileName             :: String
+    , _SPDXFile_fileTypes            :: Maybe [SPDXFileType]
+    , _SPDXFile_checksums            :: [SPDXChecksum]
+    , _SPDXFile_LicenseConcluded     :: SPDXMaybe SPDX.LicenseExpression
+    , _SPDXFile_licenseInfoInFiles   :: [String]
+    , _SPDXFile_licenseInfoFromFiles :: Maybe [String]
+    , _SPDXFile_licenseComments      :: Maybe String
+    , _SPDXFile_copyrightText        :: String
+    , _SPDXFile_comment              :: Maybe String
+    , _SPDXFile_noticeText           :: Maybe String
+    , _SPDXFile_fileContributors     :: Maybe [String]
+    , _SPDXFile_attributionTexts     :: Maybe [String]
+    , _SPDXFile_fileDependencies     :: Maybe [SPDXID]
+              -- , _SPDXFile_annotations ::
+              -- , _SPDXFile_artifactOfs ::???
+    , _SPDXFile_name                 :: Maybe String
+    }
+  deriving (Eq, Show)
+
 --         "files" : {
 --           "description" : "Files referenced in the SPDX document",
 --           "type" : "array",
@@ -166,64 +191,24 @@ data SPDXFile
 --             }
 --           }
 --         },
-              = SPDXFile
-  { _SPDXFile_SPDXID               :: SPDXID
-  , _SPDXFile_raw                  :: A.Object
-  , _SPDXFile_fileName             :: String
-  , _SPDXFile_fileTypes            :: Maybe [SPDXFileType]
-  , _SPDXFile_checksums            :: [SPDXChecksum]
-  , _SPDXFile_LicenseConcluded     :: SPDXMaybe SPDX.LicenseExpression
-  , _SPDXFile_licenseInfoInFiles   :: [String]
-  , _SPDXFile_licenseInfoFromFiles :: Maybe [String]
-  , _SPDXFile_licenseComments      :: Maybe String
-  , _SPDXFile_copyrightText        :: String
-  , _SPDXFile_comment              :: Maybe String
-  , _SPDXFile_noticeText           :: Maybe String
-  , _SPDXFile_fileContributors     :: Maybe [String]
-  , _SPDXFile_attributionTexts     :: Maybe [String]
-  , _SPDXFile_fileDependencies     :: Maybe [SPDXID]
-              -- , _SPDXFile_annotations ::
-              -- , _SPDXFile_artifactOfs ::???
-  , _SPDXFile_name                 :: Maybe String
-  }
-  deriving (Eq, Show)
 instance A.FromJSON SPDXFile where
-  parseJSON = A.withObject "SPDXFile" $ \v ->
-    SPDXFile
-      <$>   v
-      A..:  "SPDXID" -- 4.2
-      <*>   pure v
-      <*>   v
-      A..:  "fileName" -- 4.1
-      <*>   v
-      A..:? "fileTypes" -- 4.3
-      <*>   v
-      A..:  "checksums" -- 4.4
-      <*>   fmap parseLicenseExpression (v A..: "licenseConcluded") -- 4.5
-      <*>   v
-      A..:  "licenseInfoInFiles" -- 4.6
-      <*>   v
-      A..:? "licenseInfoFromFiles" -- ?
-      <*>   v
-      A..:? "licenseComments" -- 4.7
-      <*>   v
-      A..:  "copyrightText" -- 4.8
-      <*>   v
-      A..:? "comment" -- 4.12
-      <*>   v
-      A..:? "noticeText" -- 4.13
-      <*>   v
-      A..:? "fileContributors" -- 4.14
-      <*>   v
-      A..:? "attributionTexts" -- 4.15
+  parseJSON =
+    A.withObject "SPDXFile" $ \v ->
+      SPDXFile <$> v A..: "SPDXID" <*> pure v <*> v A..: "fileName" <*>
+      v A..:? "fileTypes" <*>
+      v A..: "checksums" <*>
+      fmap parseLicenseExpression (v A..: "licenseConcluded") -- 4.5
+       <*>
+      v A..: "licenseInfoInFiles" <*>
+      v A..:? "licenseInfoFromFiles" <*>
+      v A..:? "licenseComments" <*>
+      v A..: "copyrightText" <*>
+      v A..:? "comment" <*>
+      v A..:? "noticeText" <*>
+      v A..:? "fileContributors" <*>
+      v A..:? "attributionTexts" <*>
+      v A..:? "fileDependencies" <*>
+      v A..:? "name"
 
-    -- deprecated
-      <*>   v
-      A..:? "fileDependencies" -- 4.16
-
-    -- <*> v A..: "annotations"
-    -- <*> v A..: "artifactOfs"
-      <*>   v
-      A..:? "name"
 instance SPDXIDable SPDXFile where
   getSPDXID = _SPDXFile_SPDXID
