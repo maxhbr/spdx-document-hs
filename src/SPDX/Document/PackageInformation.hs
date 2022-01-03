@@ -1,22 +1,30 @@
+{-# LANGUAGE DeriveGeneric             #-}
 {-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE GADTs                     #-}
+{-# LANGUAGE LambdaCase                #-}
+{-# LANGUAGE OverloadedStrings         #-}
+{-# LANGUAGE TypeFamilies              #-}
+
 module SPDX.Document.PackageInformation where
 
 import           MyPrelude
 
 import           SPDX.Document.Common
+import           SPDX.LicenseExpression
 
-import qualified Data.Aeson                    as A
-import qualified Data.Aeson.Types              as A
-import qualified Data.Vector                   as V
-import qualified Distribution.Parsec           as SPDX
-import qualified Distribution.SPDX             as SPDX
+import qualified Data.Aeson             as A
+import qualified Data.Aeson.Types       as A
+import qualified Data.Vector            as V
+import qualified Distribution.Parsec    as SPDX
+import qualified Distribution.SPDX      as SPDX
 
-data SPDXPackageVerificationCode
+data SPDXPackageVerificationCode =
+  SPDXPackageVerificationCode
+    { _SPDXPackageVerificationCode_packageVerificationCodeValue :: String
+    , _SPDXPackageVerificationCode_packageVerificationCodeExcludedFiles :: [String]
+    }
+  deriving (Eq, Show)
+
 --               "packageVerificationCode" : {
 --                 "type" : "object",
 --                 "properties" : {
@@ -35,25 +43,46 @@ data SPDXPackageVerificationCode
 --                 },
 --                 "description" : "A manifest based verification code (the algorithm is defined in section 4.7 of the full specification) of the SPDX Item. This allows consumers of this data and/or database to determine if an SPDX item they have in hand is identical to the SPDX item from which the data was produced. This algorithm works even if the SPDX document is included in the SPDX item."
 --               },
-                                 = SPDXPackageVerificationCode
-  { _SPDXPackageVerificationCode_packageVerificationCodeValue :: String
-  , _SPDXPackageVerificationCode_packageVerificationCodeExcludedFiles
-      :: [String]
-  }
-  deriving (Eq, Show)
 instance A.FromJSON SPDXPackageVerificationCode where
-  parseJSON = A.withObject "SPDXPackageVerificationCode" $ \v ->
-    SPDXPackageVerificationCode
-      <$>  v
-      A..: "packageVerificationCodeValue"
-      <*>  fmap
-             (\case
-               Nothing     -> []
-               Just pvcefs -> pvcefs
-             )
-             (v A..:? "packageVerificationCodeExcludedFiles")
+  parseJSON =
+    A.withObject "SPDXPackageVerificationCode" $ \v ->
+      SPDXPackageVerificationCode <$> v A..: "packageVerificationCodeValue" <*>
+      fmap
+        (\case
+           Nothing     -> []
+           Just pvcefs -> pvcefs)
+        (v A..:? "packageVerificationCodeExcludedFiles")
 
-data SPDXPackage
+data SPDXPackage =
+  SPDXPackage
+    { _SPDXPackage_SPDXID                  :: SPDXID
+    , _SPDXPackage_raw                     :: A.Object
+    , _SPDXPackage_name                    :: String
+    , _SPDXPackage_versionInfo             :: Maybe String
+    , _SPDXPackage_packageFileName         :: Maybe String
+    , _SPDXPackage_supplier                :: Maybe String
+    , _SPDXPackage_originator              :: Maybe String
+    , _SPDXPackage_downloadLocation        :: SPDXMaybe String
+    , _SPDXPackage_filesAnalyzed           :: Bool
+    , _SPDXPackage_packageVerificationCode :: Maybe SPDXPackageVerificationCode
+    , _SPDXPackage_checksums               :: [SPDXChecksum]
+    , _SPDXPackage_homepage                :: Maybe String
+    , _SPDXPackage_sourceInfo              :: Maybe String
+    , _SPDXPackage_licenseConcluded        :: SPDXMaybe SPDX.LicenseExpression
+    , _SPDXPackage_licenseInfoFromFiles    :: [String]
+    , _SPDXPackage_licenseDeclared         :: SPDXMaybe SPDX.LicenseExpression
+    , _SPDXPackage_licenseComments         :: Maybe String
+    , _SPDXPackage_copyrightText           :: SPDXMaybe String
+    , _SPDXPackage_summary                 :: Maybe String
+    , _SPDXPackage_description             :: Maybe String
+    , _SPDXPackage_comment                 :: Maybe String
+                 -- , _SPDXPackage_externalRefs :: [SPDXEternalRef]
+    , _SPDXPackage_attributionTexts        :: Maybe [String]
+                 -- , _SPDXPackage_annotations :: SPDXAnnotations
+    , _SPDXPackage_hasFiles                :: Maybe [SPDXID]
+    }
+  deriving (Eq, Show)
+
 --         "packages" : {
 --           "description" : "Packages referenced in the SPDX document",
 --           "type" : "array",
@@ -230,98 +259,69 @@ data SPDXPackage
 --             }
 --           }
 --         },
-                 = SPDXPackage
-  { _SPDXPackage_SPDXID                  :: SPDXID
-  , _SPDXPackage_raw                     :: A.Object
-  , _SPDXPackage_name                    :: String
-  , _SPDXPackage_versionInfo             :: Maybe String
-  , _SPDXPackage_packageFileName         :: Maybe String
-  , _SPDXPackage_supplier                :: Maybe String
-  , _SPDXPackage_originator              :: Maybe String
-  , _SPDXPackage_downloadLocation        :: SPDXMaybe String
-  , _SPDXPackage_filesAnalyzed           :: Bool
-  , _SPDXPackage_packageVerificationCode :: Maybe SPDXPackageVerificationCode
-  , _SPDXPackage_checksums               :: [SPDXChecksum]
-  , _SPDXPackage_homepage                :: Maybe String
-  , _SPDXPackage_sourceInfo              :: Maybe String
-  , _SPDXPackage_licenseConcluded        :: SPDXMaybe SPDX.LicenseExpression
-  , _SPDXPackage_licenseInfoFromFiles    :: [String]
-  , _SPDXPackage_licenseDeclared         :: SPDXMaybe SPDX.LicenseExpression
-  , _SPDXPackage_licenseComments         :: Maybe String
-  , _SPDXPackage_copyrightText           :: SPDXMaybe String
-  , _SPDXPackage_summary                 :: Maybe String
-  , _SPDXPackage_description             :: Maybe String
-  , _SPDXPackage_comment                 :: Maybe String
-                 -- , _SPDXPackage_externalRefs :: [SPDXEternalRef]
-  , _SPDXPackage_attributionTexts        :: Maybe [String]
-                 -- , _SPDXPackage_annotations :: SPDXAnnotations
-  , _SPDXPackage_hasFiles                :: Maybe [SPDXID]
-  }
-  deriving (Eq, Show)
 instance A.FromJSON SPDXPackage where
-  parseJSON = A.withObject "SPDXPackage" $ \v ->
-    SPDXPackage
-      <$>   v
-      A..:  "SPDXID" -- 3.2
-      <*>   pure v
-      <*>   v
-      A..:  "name" -- 3.1
-      <*>   v
-      A..:? "versionInfo" -- 3.3
-      <*>   v
-      A..:? "packageFileName" -- 3.4
-      <*>   v
-      A..:? "supplier" -- 3.5
-      <*>   v
-      A..:? "originator" -- 3.6
-      <*>   v
-      A..:  "downloadLocation" -- 3.7
-      <*>   fmap
-              (\case
-                Nothing -> True
-                Just b  -> b
-              )
-              (v A..:? "filesAnalyzed") -- 3.8
-      <*>   v
-      A..:? "packageVerificationCode" -- 3.9
-      <*>   fmap
-              (\case
-                Nothing -> []
-                Just cs -> cs
-              )
-              (v A..:? "checksums") -- 3.10
-      <*>   v
-      A..:? "homepage" -- 3.11
-      <*>   v
-      A..:? "sourceInfo" -- 3.12
-      <*>   fmap parseLicenseExpression (v A..: "licenseConcluded") -- 3.13 -- not in schema
-      <*>   fmap
-              (\case
-                Nothing -> []
-                Just cs -> cs
-              )
-              (v A..:? "licenseInfoFromFiles") -- 3.14
-      <*>   fmap parseLicenseExpression (v A..: "licenseDeclared") -- 3.15 -- not in schema
-      <*>   v
-      A..:? "licenseComments" -- 3.16
-      <*>   fmap
-              (\case
-                Nothing -> NONE
-                Just ct -> ct
-              )
-              (v A..:? "copyrightText") -- 3.17
-      <*>   v
-      A..:? "summary" -- 3.18
-      <*>   v
-      A..:? "description" -- 3.19
-      <*>   v
-      A..:? "comment" -- 3.20
-    -- <*> v A..: "externalRefs" -- 3.21
-    -- External Reference Comment <a name="3.22"></a>
-      <*>   v
-      A..:? "attributionTexts" -- 3.23
-    -- <*> v A..: "annotations"
-      <*>   v
-      A..:? "hasFiles"
+  parseJSON =
+    A.withObject "SPDXPackage" $ \v ->
+      SPDXPackage <$> v A..: "SPDXID" -- 3.2
+       <*>
+      pure v <*>
+      v A..: "name" -- 3.1
+       <*>
+      v A..:? "versionInfo" -- 3.3
+       <*>
+      v A..:? "packageFileName" -- 3.4
+       <*>
+      v A..:? "supplier" -- 3.5
+       <*>
+      v A..:? "originator" -- 3.6
+       <*>
+      v A..: "downloadLocation" -- 3.7
+       <*>
+      fmap
+        (\case
+           Nothing -> True
+           Just b  -> b)
+        (v A..:? "filesAnalyzed") -- 3.8
+       <*>
+      v A..:? "packageVerificationCode" -- 3.9
+       <*>
+      fmap
+        (\case
+           Nothing -> []
+           Just cs -> cs)
+        (v A..:? "checksums") -- 3.10
+       <*>
+      v A..:? "homepage" -- 3.11
+       <*>
+      v A..:? "sourceInfo" -- 3.12
+       <*>
+      fmap parseLicenseExpression (v A..: "licenseConcluded") -- 3.13 -- not in schema
+       <*>
+      fmap
+        (\case
+           Nothing -> []
+           Just cs -> cs)
+        (v A..:? "licenseInfoFromFiles") -- 3.14
+       <*>
+      fmap parseLicenseExpression (v A..: "licenseDeclared") -- 3.15 -- not in schema
+       <*>
+      v A..:? "licenseComments" -- 3.16
+       <*>
+      fmap
+        (\case
+           Nothing -> NONE
+           Just ct -> ct)
+        (v A..:? "copyrightText") -- 3.17
+       <*>
+      v A..:? "summary" -- 3.18
+       <*>
+      v A..:? "description" -- 3.19
+       <*>
+      v A..:? "comment" -- 3.20
+       <*>
+      v A..:? "attributionTexts" -- 3.23
+       <*>
+      v A..:? "hasFiles"
+
 instance SPDXIDable SPDXPackage where
   getSPDXID = _SPDXPackage_SPDXID

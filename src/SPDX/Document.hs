@@ -41,6 +41,7 @@ import           SPDX.Document.PackageInformation                as X
 import           SPDX.Document.RelationshipTypes                 as RT
 import           SPDX.Document.RelationshipsbetweenSPDXElements  as X
 import           SPDX.Document.SnippetInformation                as X
+import           SPDX.LicenseExpression                          as X
 
 data SPDXDocument =
   SPDXDocument

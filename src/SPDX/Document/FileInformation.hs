@@ -10,12 +10,13 @@ module SPDX.Document.FileInformation where
 import           MyPrelude
 
 import           SPDX.Document.Common
+import           SPDX.LicenseExpression
 
-import qualified Data.Aeson           as A
-import qualified Data.Aeson.Types     as A
-import qualified Data.Vector          as V
-import qualified Distribution.Parsec  as SPDX
-import qualified Distribution.SPDX    as SPDX
+import qualified Data.Aeson             as A
+import qualified Data.Aeson.Types       as A
+import qualified Data.Vector            as V
+import qualified Distribution.Parsec    as SPDX
+import qualified Distribution.SPDX      as SPDX
 
 data SPDXFileType
   = OTHER
