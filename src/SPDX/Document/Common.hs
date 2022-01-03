@@ -49,6 +49,7 @@ newtype MaybeLicenseExpression =
   MLicExp
     { unMLicExp :: SPDXMaybe SPDX.LicenseExpression
     }
+  deriving (Eq)
 
 instance Show MaybeLicenseExpression where
   show (MLicExp me) = show me
