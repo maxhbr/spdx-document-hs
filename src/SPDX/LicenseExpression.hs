@@ -10,6 +10,8 @@ module SPDX.LicenseExpression
   , renderSpdxLicense
   , parseLicenseExpression
   , parseLicenseExpression'
+  , parseLicenseExpressionList
+  , parseLicenseExpressionList'
   ) where
 
 import           MyPrelude
@@ -80,3 +82,9 @@ parseLicenseExpression = unMLicExp . fromString
 
 parseLicenseExpression' :: String -> Maybe SPDX.LicenseExpression
 parseLicenseExpression' = spdxMaybeToMaybe . parseLicenseExpression
+
+parseLicenseExpressionList :: [String] -> SPDXMaybe SPDX.LicenseExpression
+parseLicenseExpressionList = unMLicExp . mconcat . map fromString
+
+parseLicenseExpressionList' :: [String] -> Maybe SPDX.LicenseExpression
+parseLicenseExpressionList' = spdxMaybeToMaybe . parseLicenseExpressionList
