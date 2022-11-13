@@ -163,6 +163,8 @@ data RelationType
     -- An APPLICATION foo.exe has prerequisite or dependency on bar.dll
   | OTHER
     -- Is to be used for a relationship which has not been defined in the formal SPDX specification. A description of the relationship should be included in the Relationship comments field.
+  | EQUIREMENT_DESCRIPTION_FOR 
+  | SPECIFICATION_FOR
   deriving (Eq, Show, Generic, Enum, Ord)
 
 instance A.ToJSON RelationType

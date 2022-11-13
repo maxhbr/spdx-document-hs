@@ -295,7 +295,9 @@ instance A.FromJSON SPDXPackage where
        <*>
       v A..:? "sourceInfo" -- 3.12
        <*>
-      fmap parseLicenseExpression (v A..: "licenseConcluded") -- 3.13 -- not in schema
+        fmap (\case 
+               Just licenseConcluded -> parseLicenseExpression licenseConcluded
+               Nothing -> NOASSERTION) (v A..:? "licenseConcluded") -- 3.13 -- not in schema
        <*>
       fmap
         (\case
@@ -303,7 +305,9 @@ instance A.FromJSON SPDXPackage where
            Just cs -> cs)
         (v A..:? "licenseInfoFromFiles") -- 3.14
        <*>
-      fmap parseLicenseExpression (v A..: "licenseDeclared") -- 3.15 -- not in schema
+      fmap (\case 
+               Just licenseConcluded -> parseLicenseExpression licenseConcluded
+               Nothing -> NOASSERTION)  (v A..:? "licenseDeclared") -- 3.15 -- not in schema
        <*>
       v A..:? "licenseComments" -- 3.16
        <*>

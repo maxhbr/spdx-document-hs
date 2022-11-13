@@ -42,10 +42,10 @@ data SPDXFile =
     , _SPDXFile_fileTypes            :: Maybe [SPDXFileType]
     , _SPDXFile_checksums            :: [SPDXChecksum]
     , _SPDXFile_LicenseConcluded     :: SPDXMaybe SPDX.LicenseExpression
-    , _SPDXFile_licenseInfoInFiles   :: [String]
+    , _SPDXFile_licenseInfoInFiles   :: [SPDXMaybe SPDX.LicenseExpression]
     , _SPDXFile_licenseInfoFromFiles :: Maybe [String]
     , _SPDXFile_licenseComments      :: Maybe String
-    , _SPDXFile_copyrightText        :: String
+    , _SPDXFile_copyrightText        :: SPDXMaybe String
     , _SPDXFile_comment              :: Maybe String
     , _SPDXFile_noticeText           :: Maybe String
     , _SPDXFile_fileContributors     :: Maybe [String]
@@ -198,12 +198,18 @@ instance A.FromJSON SPDXFile where
       SPDXFile <$> v A..: "SPDXID" <*> pure v <*> v A..: "fileName" <*>
       v A..:? "fileTypes" <*>
       v A..: "checksums" <*>
-      fmap parseLicenseExpression (v A..: "licenseConcluded") -- 4.5
+      fmap (\case 
+               Just licenseConcluded -> parseLicenseExpression licenseConcluded
+               Nothing -> NOASSERTION) (v A..:? "licenseConcluded") -- 4.5
        <*>
-      v A..: "licenseInfoInFiles" <*>
+      fmap (\case 
+        Just lics -> map parseLicenseExpression lics
+        Nothing -> []) (v A..:? "licenseInfoInFiles") <*>
       v A..:? "licenseInfoFromFiles" <*>
       v A..:? "licenseComments" <*>
-      v A..: "copyrightText" <*>
+      fmap (\case
+        Just copyrightText -> copyrightText
+        Nothing -> NOASSERTION) (v A..:? "copyrightText") <*>
       v A..:? "comment" <*>
       v A..:? "noticeText" <*>
       v A..:? "fileContributors" <*>

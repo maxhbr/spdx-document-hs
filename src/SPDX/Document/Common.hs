@@ -63,9 +63,37 @@ data SPDXChecksumAlgorithm
   | MD6
   | MD5
   | SHA224
+  | SHA3256
+  | SHA3384
+  | SHA3512
+  | BLAKE2b256
+  | BLAKE2b384
+  | BLAKE2b512
+  | BLAKE3
+  | ADLER32
   deriving (Eq, Show, Generic)
 
-instance A.FromJSON SPDXChecksumAlgorithm
+instance A.FromJSON SPDXChecksumAlgorithm where
+  parseJSON  = A.withText "SPDXChecksumAlgorithm" $ \t -> case T.unpack t of
+    "SHA256" ->        return SHA256                  
+    "SHA1" ->          return SHA1                  
+    "SHA384" ->        return SHA384                  
+    "MD2" ->           return MD2                  
+    "MD4" ->           return MD4                  
+    "SHA512" ->        return SHA512                  
+    "MD6" ->           return MD6                  
+    "MD5" ->           return MD5                  
+    "SHA224" ->        return SHA224                  
+    "SHA3-256" ->      return  SHA3256                  
+    "SHA3-384" ->      return  SHA3384                  
+    "SHA3-512" ->      return  SHA3512                  
+    "BLAKE2b-256" ->   return  BLAKE2b256                  
+    "BLAKE2b-384" ->   return  BLAKE2b384                  
+    "BLAKE2b-512" ->   return  BLAKE2b512                  
+    "BLAKE3" ->        return BLAKE3               
+    "ADLER32" ->       return ADLER32               
+    t -> fail ("not supported SPDXChecksumAlgorithm: " ++ t)  
+
 
 data SPDXChecksum =
   SPDXChecksum
