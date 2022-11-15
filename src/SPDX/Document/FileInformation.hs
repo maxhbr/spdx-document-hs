@@ -53,7 +53,6 @@ data SPDXFile =
     , _SPDXFile_fileDependencies     :: Maybe [SPDXID]
               -- , _SPDXFile_annotations ::
               -- , _SPDXFile_artifactOfs ::???
-    , _SPDXFile_name                 :: Maybe String
     }
   deriving (Eq, Show)
 
@@ -214,8 +213,7 @@ instance A.FromJSON SPDXFile where
       v A..:? "noticeText" <*>
       v A..:? "fileContributors" <*>
       v A..:? "attributionTexts" <*>
-      v A..:? "fileDependencies" <*>
-      v A..:? "name"
+      v A..:? "fileDependencies"
 
 instance SPDXIDable SPDXFile where
   getSPDXID = _SPDXFile_SPDXID
