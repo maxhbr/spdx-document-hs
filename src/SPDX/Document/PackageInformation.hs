@@ -52,6 +52,43 @@ instance A.FromJSON SPDXPackageVerificationCode where
            Nothing     -> []
            Just pvcefs -> pvcefs)
         (v A..:? "packageVerificationCodeExcludedFiles")
+  
+data SPDXPackagePurpose = 
+  PPP_APPLICATION | PPP_FRAMEWORK | PPP_LIBRARY | PPP_CONTAINER | PPP_OPERATING_SYSTEM | PPP_DEVICE | PPP_FIRMWARE | PPP_SOURCE | PPP_ARCHIVE | PPP_FILE | PPP_INSTALL | PPP_OTHER
+  deriving (Eq)
+instance Show SPDXPackagePurpose where
+  show PPP_APPLICATION      = "APPLICATION"
+  show PPP_FRAMEWORK        = "FRAMEWORK"
+  show PPP_LIBRARY          = "LIBRARY"
+  show PPP_CONTAINER        = "CONTAINER"
+  show PPP_OPERATING_SYSTEM = "OPERATING-SYSTEM"
+  show PPP_DEVICE           = "DEVICE"
+  show PPP_FIRMWARE         = "FIRMWARE"
+  show PPP_SOURCE           = "SOURCE"
+  show PPP_ARCHIVE          = "ARCHIVE"
+  show PPP_FILE             = "FILE"
+  show PPP_INSTALL          = "INSTALL"
+  show PPP_OTHER            = "OTHER"
+
+instance A.FromJSON SPDXPackagePurpose where
+  parseJSON (A.String text) = return $ case text of
+    "APPLICATION" -> PPP_APPLICATION
+    "FRAMEWORK" -> PPP_FRAMEWORK 
+    "LIBRARY" -> PPP_LIBRARY 
+    "CONTAINER" -> PPP_CONTAINER 
+    "OPERATING-SYSTEM" -> PPP_OPERATING_SYSTEM
+    "OPERATING_SYSTEM" -> PPP_OPERATING_SYSTEM
+    "DEVICE" -> PPP_DEVICE 
+    "FIRMWARE" -> PPP_FIRMWARE 
+    "SOURCE" -> PPP_SOURCE 
+    "ARCHIVE" -> PPP_ARCHIVE 
+    "FILE" -> PPP_FILE 
+    "INSTALL" -> PPP_INSTALL 
+    "OTHER" -> PPP_OTHER
+    _ -> PPP_OTHER
+  parseJSON _ = fail "failed to parse SPDXPackagePurpose"
+instance A.ToJSON SPDXPackagePurpose where
+  toJSON = A.toJSON . show
 
 data SPDXPackage =
   SPDXPackage
@@ -79,6 +116,7 @@ data SPDXPackage =
                  -- , _SPDXPackage_externalRefs :: [SPDXEternalRef]
     , _SPDXPackage_attributionTexts        :: Maybe [String]
                  -- , _SPDXPackage_annotations :: SPDXAnnotations
+    , _SPDXPackage_primaryPackagePurpose   :: Maybe SPDXPackagePurpose
     , _SPDXPackage_hasFiles                :: Maybe [SPDXID]
     }
   deriving (Eq, Show)
@@ -324,6 +362,8 @@ instance A.FromJSON SPDXPackage where
       v A..:? "comment" -- 3.20
        <*>
       v A..:? "attributionTexts" -- 3.23
+       <*>
+      v A..:? "primaryPackagePurpose"
        <*>
       v A..:? "hasFiles"
 
