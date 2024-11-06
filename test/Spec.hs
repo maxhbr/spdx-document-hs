@@ -32,10 +32,10 @@ import SPDX.Document.Common
 
 spdxFileBS :: B.ByteString
 spdxFileBS =
-  B.fromStrict $(embedFile "spdx-spec/examples/SPDXJSONExample-v2.2.spdx.json")
+  B.fromStrict $(embedFile "spdx-spec/examples/SPDXJSONExample-v2.3.spdx.json")
 
 spdxYamlFileBS :: BS.ByteString
-spdxYamlFileBS = $(embedFile "spdx-spec/examples/SPDXYAMLExample-2.2.spdx.yaml")
+spdxYamlFileBS = $(embedFile "spdx-spec/examples/SPDXYAMLExample-2.3.spdx.yaml")
 
 otherSpdxYamlFileBS :: BS.ByteString
 otherSpdxYamlFileBS = $(embedFile "test/data/document.spdx.yml")
